@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="PortalCore – Recuperación de credenciales con validación avanzada y cifrado perimetral." />
+    <title>Recuperar Contraseña – PortalCore</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet" />
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: { display: ['Sora', 'sans-serif'], body: ['DM Sans', 'sans-serif'] },
+            colors: {
+              brand: {
+                50: '#f0f4ff', 100: '#dde8ff', 200: '#b8ccff', 500: '#4f6ef7',
+                600: '#3b55e6', 700: '#2a3fcb', 800: '#1e2fa8', 900: '#131f7a', 950: '#0c1455'
+              }
+            }
+          }
+        }
+      };
+    </script>
+
+    <style>
+      *, *::before, *::after { box-sizing: border-box; }
+      html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+      body { font-family: 'DM Sans', sans-serif; background: #f6f7fb; color: #1e2230; }
+      h1, h2 { font-family: 'Sora', sans-serif; }
+
+      .skip-link { position: absolute; top: -100%; left: 1rem; background: #131f7a; color: #fff; padding: 0.5rem 1rem; border-radius: 0 0 8px 8px; font-weight: 600; font-size: 0.875rem; z-index: 9999; transition: top 0.2s; }
+      .skip-link:focus { top: 0; }
+
+      #toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem; pointer-events: none; }
+      .toast { display: flex; align-items: flex-start; gap: 0.75rem; background: #fff; border: 1px solid #e5e7eb; border-left: 4px solid #4f6ef7; border-radius: 10px; padding: 0.875rem 1.125rem; box-shadow: 0 8px 32px rgba(30, 34, 48, 0.12); min-width: 280px; max-width: 360px; pointer-events: all; animation: toastIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+      .toast.toast--success { border-left-color: #22c55e; }
+      .toast.toast--error   { border-left-color: #ef4444; }
+      .toast.toast--warning { border-left-color: #f59e0b; }
+      .toast__icon { font-size: 1.25rem; margin-top: 1px; flex-shrink: 0; }
+      .toast--success .toast__icon { color: #22c55e; }
+      .toast--error   .toast__icon { color: #ef4444; }
+      .toast--warning .toast__icon { color: #f59e0b; }
+      .toast--info    .toast__icon { color: #4f6ef7; }
+      .toast__content { flex: 1; }
+      .toast__title { font-family: 'Sora', sans-serif; font-size: 0.875rem; font-weight: 700; color: #1e2230; }
+      .toast__msg   { font-size: 0.8125rem; color: #6b7280; margin-top: 2px; }
+      .toast__close { background: none; border: none; cursor: pointer; color: #9ca3af; font-size: 1rem; padding: 0; line-height: 1; transition: color 0.15s; flex-shrink: 0; }
+      .toast__close:hover { color: #4b5563; }
+
+      @keyframes toastIn { from { opacity: 0; transform: translateX(2rem) scale(0.95); } to { opacity: 1; transform: none; } }
+      @keyframes toastOut { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateX(2rem) scale(0.9); } }
+      .toast--exiting { animation: toastOut 0.25s ease forwards; }
+
+      .field-error input { border-color: #ef4444 !important; box-shadow: 0 0 0 3px rgba(239,68,68,0.12); }
+      .field-error .field-msg { color: #ef4444; }
+      .field-success input { border-color: #22c55e !important; box-shadow: 0 0 0 3px rgba(34,197,94,0.12); }
+      .field-success .field-msg { color: #22c55e; }
+      .field-msg { font-size: 0.75rem; margin-top: 4px; display: flex; align-items: center; gap: 4px; transition: color 0.2s; }
+
+      .strength-bar { display: flex; gap: 4px; margin-top: 6px; }
+      .strength-bar span { flex: 1; height: 4px; border-radius: 99px; background: #e5e7eb; transition: background 0.3s; }
+      .strength-bar.s1 span:nth-child(1) { background: #ef4444; }
+      .strength-bar.s2 span:nth-child(-n+2) { background: #f59e0b; }
+      .strength-bar.s3 span:nth-child(-n+3) { background: #3b82f6; }
+      .strength-bar.s4 span { background: #22c55e; }
+      .strength-label { font-size: 0.7rem; font-weight: 600; margin-top: 2px; letter-spacing: 0.05em; text-transform: uppercase; }
+
+      .hero-gradient { background: linear-gradient(135deg, #0c1455 0%, #1e2fa8 40%, #2a3fcb 70%, #3b55e6 100%); position: relative; overflow: hidden; }
+      :focus-visible { outline: 2px solid #4f6ef7; outline-offset: 3px; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+  <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+
+  <header class="bg-white border-b border-gray-200 shadow-sm" role="banner">
+    <div class="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between gap-4">
+      <a href="index.html" class="flex items-center gap-2 flex-shrink-0" aria-label="PortalCore – Volver al inicio">
+        <div class="bg-brand-600 text-white p-2 rounded-lg flex items-center justify-center w-10 h-10 shadow-md" aria-hidden="true">
+          <i class="fa-solid fa-cubes text-xl"></i>
+        </div>
+        <span class="font-bold text-xl tracking-tight text-brand-900" style="font-family:'Sora',sans-serif">
+          Portal<span class="text-brand-600">Core</span>
+        </span>
+      </a>
+      <div>
+        <a href="index.html" class="text-sm font-semibold bg-gray-100 text-gray-700 px-5 py-2 rounded-full hover:bg-gray-200 transition-colors shadow-sm focus-visible:ring-2 focus-visible:ring-brand-500">
+          Volver al Login
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content" class="flex-grow hero-gradient flex items-center justify-center px-4 py-16">
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 sm:p-8 transition-all duration-300">
+      
+      <div id="pane-request">
+        <div class="text-center mb-6">
+          <div class="w-12 h-12 bg-brand-50 text-brand-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl" aria-hidden="true">
+            <i class="fa-solid fa-envelope-open-text"></i>
+          </div>
+          <h1 class="text-2xl font-bold text-brand-900">Restablecer acceso</h1>
+          <p class="text-gray-500 text-xs mt-1.5 leading-relaxed">Escribe tu correo verificado y procesaremos el envío de instrucciones perimetrales de seguridad.</p>
+        </div>
+
+        <form id="form-request" novalidate class="space-y-4">
+          <div id="field-email">
+            <label for="user-email" class="block text-sm font-medium text-gray-700 mb-1.5">Correo electrónico</label>
+            <input type="email" id="user-email" required placeholder="correo@ejemplo.com" autocomplete="email" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition text-sm" aria-describedby="email-msg" />
+            <p id="email-msg" class="field-msg" aria-live="polite"></p>
+          </div>
+          
+          <div id="field-captcha" class="flex flex-col items-center py-2 bg-gray-50 rounded-xl border border-gray-100">
+            <div class="g-recaptcha" data-sitekey="6Ld03AktAAAAAEAjh_e6i4uVzLuc_gawN0w0Rzeb"></div>
+            <p id="captcha-msg" class="text-xs mt-1 font-medium text-red-500" aria-live="polite"></p>
+          </div>
+
+          <button type="submit" id="btn-request" class="w-full bg-brand-600 text-white font-bold py-3 rounded-xl hover:bg-brand-700 transition shadow-md text-sm focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2">
+            Enviar enlace seguro
+          </button>
+        </form>
+      </div>
+
+      <div id="pane-reset" class="hidden">
+        <div class="text-center mb-6">
+          <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl" aria-hidden="true">
+            <i class="fa-solid fa-user-shield"></i>
+          </div>
+          <h1 class="text-2xl font-bold text-brand-900">Nueva Contraseña</h1>
+          <p class="text-gray-500 text-xs mt-1.5 leading-relaxed">Tu token perimetral ha sido verificado. Por favor, introduce tu nueva clave de acceso.</p>
+        </div>
+
+        <form id="form-reset" novalidate class="space-y-4">
+  
+  <div id="field-code">
+    <label for="user-code" class="block text-sm font-medium text-gray-700 mb-1.5">Código de verificación (6 dígitos)</label>
+    <input type="text" id="user-code" required maxlength="6" placeholder="000000" autocomplete="off" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition text-sm text-center font-bold tracking-widest text-brand-900" aria-describedby="code-msg" />
+    <p id="code-msg" class="field-msg" aria-live="polite"></p>
+  </div>
+
+  <div id="field-pass">
+    <label for="user-pass" class="block text-sm font-medium text-gray-700 mb-1.5">Nueva contraseña</label>
+    <div class="relative">
+      <input type="password" id="user-pass" required autocomplete="new-password" placeholder="••••••••" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition text-sm pr-11" aria-describedby="pass-msg" />
+      <button type="button" id="toggle-pass" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition" aria-label="Mostrar contraseña" aria-pressed="false">
+        <i class="fa-regular fa-eye text-sm" aria-hidden="true"></i>
+      </button>
+    </div>
+    <p id="pass-msg" class="field-msg" aria-live="polite"></p>
+  </div>
+
+  <div class="space-y-1.5">
+    <div class="strength-meter h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+      <div id="strength-bar" class="strength-bar h-full w-0 transition-all duration-300"></div>
+    </div>
+    <div class="flex justify-between items-center text-xs">
+      <span class="text-gray-400">Fuerza de la contraseña</span>
+      <span id="strength-label" class="font-medium" aria-live="polite"></span>
+    </div>
+  </div>
+
+  <div id="field-confirm-pass">
+    <label for="user-confirm-pass" class="block text-sm font-medium text-gray-700 mb-1.5">Confirmar nueva contraseña</label>
+    <input type="password" id="user-confirm-pass" required placeholder="••••••••" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition text-sm" aria-describedby="confirm-pass-msg" />
+    <p id="confirm-pass-msg" class="field-msg" aria-live="polite"></p>
+  </div>
+
+  <button type="submit" id="btn-reset" class="w-full bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white font-medium py-2.5 px-4 rounded-xl shadow-lg shadow-brand-500/10 focus:ring-4 focus:ring-brand-500/20 transition text-sm flex items-center justify-center gap-2">
+    Guardar nueva contraseña
+  </button>
+
+</form>
+
+    </div>
+  </main>
+
+  <footer class="bg-gray-950 text-gray-600 text-xs py-6 text-center border-t border-gray-800" role="contentinfo">
+    &copy; 2026 PortalCore. Protección y diseño adaptativo.
+  </footer>
+
+  <div id="toast-container" aria-live="polite" aria-atomic="false" role="status"></div>
+
+  <script>
+const Toast = (() => {
+  const ICONS = {
+    success: '<i class="fa-solid fa-circle-check text-lg" aria-hidden="true"></i>',
+    error:   '<i class="fa-solid fa-circle-xmark text-lg" aria-hidden="true"></i>',
+    warning: '<i class="fa-solid fa-triangle-exclamation text-lg" aria-hidden="true"></i>',
+    info:    '<i class="fa-solid fa-circle-info text-lg" aria-hidden="true"></i>',
+  };
+  function show(type = 'info', title = '', message = '', duration = 4500) {
+    const container = document.getElementById('toast-container');
+    const el = document.createElement('div');
+    el.className = `toast toast--${type}`;
+    el.setAttribute('role', 'alert');
+    el.innerHTML = `${ICONS[type] || ICONS.info}<div class="toast__content flex-1"><p class="font-bold text-sm">${title}</p>${message ? `<p class="text-xs opacity-90">${message}</p>` : ''}</div><button class="toast__close opacity-70 hover:opacity-100 p-1 transition"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>`;
+    el.querySelector('.toast__close').addEventListener('click', () => dismiss(el));
+    container.appendChild(el);
+    if (duration > 0) setTimeout(() => dismiss(el), duration);
+  }
+  function dismiss(el) {
+    if (!el || el.classList.contains('toast--exiting')) return;
+    el.classList.add('toast--exiting');
+    el.addEventListener('animationend', () => el.remove(), { once: true });
+  }
+  return { show };
+})();
+
+const Validators = {
+  email(value) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value.trim()); },
+  password(value) { return value.length >= 8; },
+  passwordStrength(value) {
+    let score = 0;
+    if (value.length >= 8)  score++;
+    if (value.length >= 12) score++;
+    if (/[A-Z]/.test(value) && /[a-z]/.test(value)) score++;
+    if (/\d/.test(value) && /[^a-zA-Z0-9]/.test(value)) score++;
+    return score;
+  }
+};
+
+const FieldUI = {
+  setError(wrapId, msgId, text) {
+    const wrap = document.getElementById(wrapId);
+    const msg  = document.getElementById(msgId);
+    if (!wrap || !msg) return;
+    wrap.className = wrap.className.replace(/field-error|field-success/g, '').trim();
+    wrap.classList.add('field-error');
+    msg.innerHTML = `<i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i> ${text}`;
+  },
+  setSuccess(wrapId, msgId) {
+    const wrap = document.getElementById(wrapId);
+    const msg  = document.getElementById(msgId);
+    if (!wrap || !msg) return;
+    wrap.className = wrap.className.replace(/field-error|field-success/g, '').trim();
+    wrap.classList.add('field-success');
+    msg.innerHTML = '';
+  },
+  clear(wrapId, msgId) {
+    const wrap = document.getElementById(wrapId);
+    const msg  = document.getElementById(msgId);
+    if (wrap) wrap.className = wrap.className.replace(/field-error|field-success/g, '').trim();
+    if (msg) msg.innerHTML = '';
+  }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+
+  let emailSolicitado = '';
+
+  const emailInput = document.getElementById('user-email');
+  const codeInput = document.getElementById('user-code');
+  const passInput = document.getElementById('user-pass');
+  const confirmInput = document.getElementById('user-confirm-pass');
+
+  if(emailInput) {
+    emailInput.addEventListener('blur', () => {
+      if (!emailInput.value.trim()) FieldUI.setError('field-email', 'email-msg', 'El correo electrónico es requerido.');
+      else if (!Validators.email(emailInput.value)) FieldUI.setError('field-email', 'email-msg', 'Ingresa un correo electrónico válido.');
+      else FieldUI.setSuccess('field-email', 'email-msg');
+    });
+  }
+
+  if(codeInput) {
+    codeInput.addEventListener('blur', () => {
+      const val = codeInput.value.trim();
+      if (!val || val.length !== 6 || isNaN(val)) {
+        FieldUI.setError('field-code', 'code-msg', 'Introduce el código de 6 números.');
+      } else {
+        FieldUI.setSuccess('field-code', 'code-msg');
+      }
+    });
+  }
+
+  if(passInput) {
+    passInput.addEventListener('blur', () => {
+      if (!passInput.value) FieldUI.setError('field-pass', 'pass-msg', 'La contraseña es requerida.');
+      else if (!Validators.password(passInput.value)) FieldUI.setError('field-pass', 'pass-msg', 'Mínimo 8 caracteres.');
+      else FieldUI.setSuccess('field-pass', 'pass-msg');
+    });
+
+    passInput.addEventListener('input', () => {
+      const score = Validators.passwordStrength(passInput.value);
+      const bar = document.getElementById('strength-bar');
+      const label = document.getElementById('strength-label');
+      bar.className = 'strength-bar' + (score > 0 ? ` s${score}` : '');
+      const labels = ['', 'Muy débil ❌', 'Débil ⚠️', 'Buena 🛠️', 'Fuerte ✅'];
+      const colors = ['', '#ef4444', '#f59e0b', '#3b82f6', '#22c55e'];
+      label.textContent = labels[score] || '';
+      label.style.color = colors[score] || '';
+    });
+  }
+
+  if(confirmInput) {
+    confirmInput.addEventListener('blur', () => {
+      if (!confirmInput.value) FieldUI.setError('field-confirm-pass', 'confirm-pass-msg', 'Confirma tu contraseña.');
+      else if (passInput.value !== confirmInput.value) FieldUI.setError('field-confirm-pass', 'confirm-pass-msg', 'Las contraseñas no coinciden.');
+      else FieldUI.setSuccess('field-confirm-pass', 'confirm-pass-msg');
+    });
+  }
+
+  const toggleBtn = document.getElementById('toggle-pass');
+  if (toggleBtn && passInput) {
+    toggleBtn.addEventListener('click', () => {
+      const isHidden = passInput.type === 'password';
+      passInput.type = isHidden ? 'text' : 'password';
+      toggleBtn.setAttribute('aria-pressed', String(isHidden));
+      toggleBtn.querySelector('i').className = isHidden ? 'fa-regular fa-eye-slash text-sm' : 'fa-regular fa-eye text-sm';
+    });
+  }
+
+  document.getElementById('form-request').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const email = emailInput.value.trim();
+    const captcha = typeof grecaptcha !== 'undefined' ? grecaptcha.getResponse() : '';
+
+    if (!email || !Validators.email(email)) {
+      FieldUI.setError('field-email', 'email-msg', 'Ingresa un correo válido.');
+      return;
+    }
+    if (!captcha) {
+      FieldUI.setError('field-captcha', 'captcha-msg', 'Por favor, completa el CAPTCHA "No soy un robot".');
+      return;
+    }
+    FieldUI.clear('field-captcha', 'captcha-msg');
+
+    const btn = document.getElementById('btn-request');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Procesando…';
+
+    try {
+      const response = await fetch('api/recuperar.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'request', email, captcha_token: captcha })
+      });
+      const data = await response.json();
+
+      if(data.ok) {
+        Toast.show('success', 'Código Enviado', data.msg);
+        
+        emailSolicitado = email;
+        document.getElementById('pane-request').classList.add('hidden');
+        document.getElementById('pane-reset').classList.remove('hidden');
+        
+        document.getElementById('form-request').reset();
+        FieldUI.clear('field-email', 'email-msg');
+      } else {
+        Toast.show('error', 'Error en Solicitud', data.msg);
+      }
+    } catch {
+      Toast.show('error', 'Fallo del Sistema', 'No se pudo establecer conexión perimetral con el servidor.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Enviar enlace seguro';
+      if (typeof grecaptcha !== 'undefined') grecaptcha.reset();
+    }
+  });
+
+  document.getElementById('form-reset').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const code = codeInput ? codeInput.value.trim() : '';
+    const password = passInput.value;
+    const confirmPassword = confirmInput.value;
+
+    if (!code || code.length !== 6 || isNaN(code)) {
+      FieldUI.setError('field-code', 'code-msg', 'Introduce un código válido de 6 números.');
+      return;
+    }
+    if (!Validators.password(password)) {
+      FieldUI.setError('field-pass', 'pass-msg', 'Contraseña no cumple los mínimos.');
+      return;
+    }
+    if (password !== confirmPassword) {
+      FieldUI.setError('field-confirm-pass', 'confirm-pass-msg', 'Las contraseñas no coinciden.');
+      return;
+    }
+
+    const btn = document.getElementById('btn-reset');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Guardando cambios…';
+
+    try {
+      const response = await fetch('api/recuperar.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'reset', email: emailSolicitado, code: code, password: password })
+      });
+      const data = await response.json();
+
+      if (data.ok) {
+        Toast.show('success', '¡Transacción Exitosa!', data.msg);
+        setTimeout(() => { window.location.href = 'index.html'; }, 3500);
+      } else {
+        Toast.show('error', 'Error de Validación', data.msg); // Aquí mostrará "Código incorrecto"
+      }
+    } catch {
+      Toast.show('error', 'Fallo de Red', 'Error al procesar los cambios cifrados.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Guardar nueva contraseña';
+    }
+  });
+});
+  </script>
+</body>
+</html>

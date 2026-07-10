@@ -1,0 +1,5 @@
+config/config.php
+config/database.php
+router.php
+404.php
+500.php

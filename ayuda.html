@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Centro de Ayuda y Preguntas Frecuentes – PortalCore." />
+    <title>Ayuda – PortalCore</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet" />
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: { display: ['Sora', 'sans-serif'], body: ['DM Sans', 'sans-serif'] },
+            colors: {
+              brand: {
+                50: '#f0f4ff', 100: '#dde8ff', 200: '#b8ccff', 500: '#4f6ef7',
+                600: '#3b55e6', 700: '#2a3fcb', 800: '#1e2fa8', 900: '#131f7a', 950: '#0c1455'
+              }
+            }
+          }
+        }
+      };
+    </script>
+
+    <style>
+      *, *::before, *::after { box-sizing: border-box; }
+      html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+      body { font-family: 'DM Sans', sans-serif; background: #f6f7fb; color: #1e2230; }
+      h1, h2, h3 { font-family: 'Sora', sans-serif; }
+      .hero-gradient { background: linear-gradient(135deg, #0c1455 0%, #1e2fa8 40%, #2a3fcb 70%, #3b55e6 100%); }
+      :focus-visible { outline: 2px solid #4f6ef7; outline-offset: 3px; }
+      
+      .faq-content { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s ease-out; }
+      .faq-content.open { grid-template-rows: 1fr; }
+      .faq-content > div { overflow: hidden; }
+      .faq-icon { transition: transform 0.3s ease; }
+      .open .faq-icon { transform: rotate(180deg); }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+  <header class="bg-white border-b border-gray-200 shadow-sm" role="banner">
+    <div class="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between gap-4">
+      <a href="index.html" class="flex items-center gap-2 flex-shrink-0">
+        <div class="bg-brand-600 text-white p-2 rounded-lg flex items-center justify-center w-10 h-10 shadow-md">
+          <i class="fa-solid fa-cubes text-xl"></i>
+        </div>
+        <span class="font-bold text-xl tracking-tight text-brand-900" style="font-family:'Sora',sans-serif">
+          Portal<span class="text-brand-600">Core</span>
+        </span>
+      </a>
+      <div>
+        <a href="index.html" class="text-sm font-semibold bg-gray-100 text-gray-700 px-5 py-2 rounded-full hover:bg-gray-200 transition-colors shadow-sm focus-visible:ring-2 focus-visible:ring-brand-500">
+          <i class="fa-solid fa-house me-2"></i>Inicio
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow hero-gradient flex items-center justify-center px-4 py-12">
+    <div class="w-full max-w-3xl bg-white rounded-2xl shadow-2xl p-6 sm:p-10 transition-all duration-300">
+      
+      <div class="text-center mb-10">
+        <div class="w-14 h-14 bg-brand-50 text-brand-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl">
+          <i class="fa-solid fa-book-open"></i>
+        </div>
+        <h1 class="text-3xl font-bold text-brand-900">Centro de Ayuda</h1>
+        <p class="text-gray-500 text-sm mt-2 leading-relaxed">Encuentra respuestas rápidas a las consultas más comunes de la plataforma.</p>
+      </div>
+
+      <div class="space-y-4 mb-10">
+        <div class="border border-gray-200 rounded-xl overflow-hidden bg-gray-50/50 hover:bg-gray-50 transition-colors">
+          <button class="faq-btn w-full px-6 py-4 flex items-center justify-between text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">
+            <span class="font-semibold text-brand-900 text-sm">¿Qué es PortalCore y qué tecnologías usa?</span>
+            <i class="fa-solid fa-chevron-down text-brand-500 text-sm faq-icon"></i>
+          </button>
+          <div class="faq-content">
+            <div class="px-6 pb-4 text-sm text-gray-600 leading-relaxed border-t border-gray-100 mx-6 pt-4">
+              Es una plataforma perimetral segura para la automatización de accesos y conectividad. Su backend está construido de manera modular en PHP y se integra de forma directa con servicios de IA avanzada como Groq y Gemini.
+            </div>
+          </div>
+        </div>
+
+        <div class="border border-gray-200 rounded-xl overflow-hidden bg-gray-50/50 hover:bg-gray-50 transition-colors">
+          <button class="faq-btn w-full px-6 py-4 flex items-center justify-between text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">
+            <span class="font-semibold text-brand-900 text-sm">¿Cómo puedo restablecer mi contraseña?</span>
+            <i class="fa-solid fa-chevron-down text-brand-500 text-sm faq-icon"></i>
+          </button>
+          <div class="faq-content">
+            <div class="px-6 pb-4 text-sm text-gray-600 leading-relaxed border-t border-gray-100 mx-6 pt-4">
+              Ve a la pantalla de Login, haz clic en "¿Olvidaste tu contraseña?" e introduce tu correo corporativo. Nuestro sistema cifrado SMTP te despachará un enlace seguro de recuperación de forma inmediata.
+            </div>
+          </div>
+        </div>
+
+        <div class="border border-gray-200 rounded-xl overflow-hidden bg-gray-50/50 hover:bg-gray-50 transition-colors">
+          <button class="faq-btn w-full px-6 py-4 flex items-center justify-between text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">
+            <span class="font-semibold text-brand-900 text-sm">¿Las llaves API y datos están protegidos?</span>
+            <i class="fa-solid fa-chevron-down text-brand-500 text-sm faq-icon"></i>
+          </button>
+          <div class="faq-content">
+            <div class="px-6 pb-4 text-sm text-gray-600 leading-relaxed border-t border-gray-100 mx-6 pt-4">
+              Absolutamente. Todas las credenciales de base de datos y llaves de IA se procesan de forma privada en el servidor, completamente aisladas de repositorios públicos mediante configuraciones centralizadas.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-brand-50 rounded-xl p-6 text-center border border-brand-100">
+        <h3 class="font-bold text-brand-900 mb-2">¿No encontraste lo que buscabas?</h3>
+        <p class="text-sm text-gray-600 mb-4">Nuestro equipo de soporte técnico está listo para ayudarte con tu requerimiento específico.</p>
+        <a href="contactanos.html" class="inline-flex items-center justify-center bg-white border-2 border-brand-600 text-brand-600 font-bold py-2.5 px-6 rounded-xl hover:bg-brand-600 hover:text-white transition-all shadow-sm text-sm">
+          <i class="fa-solid fa-headset me-2"></i>Solicitar Ayuda Técnica
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="bg-gray-950 text-gray-600 text-xs py-6 text-center border-t border-gray-800">
+    &copy; 2026 PortalCore. Protección y diseño adaptativo.
+  </footer>
+
+  <script>
+    document.querySelectorAll('.faq-btn').forEach(button => {
+      button.addEventListener('click', () => {
+        const content = button.nextElementSibling;
+        const isOpen = content.classList.contains('open');
+        
+        document.querySelectorAll('.faq-content').forEach(el => el.classList.remove('open'));
+        
+        if (!isOpen) content.classList.add('open');
+      });
+    });
+  </script>
+</body>
+</html>
