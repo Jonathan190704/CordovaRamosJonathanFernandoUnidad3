@@ -1,20 +1,16 @@
 <?php
-// 1. Protegemos la ruta para que SOLO administradores puedan verla
 require_once 'config/auth.php';
 verificarAcceso(['admin']);
 
-// 2. Conectamos a la BD y obtenemos los usuarios y roles disponibles
 require_once 'config/database.php';
 
-try {
-    // Obtener todos los usuarios
+try 
     $stmtUsers = $pdo->query("SELECT u.id, u.nombre, u.email, u.rol_id, r.nombre_rol 
                               FROM usuarios u 
                               INNER JOIN roles r ON u.rol_id = r.id 
                               ORDER BY u.id DESC");
     $usuarios = $stmtUsers->fetchAll();
 
-    // Obtener todos los roles para llenar el select (<option>)
     $stmtRoles = $pdo->query("SELECT id, nombre_rol FROM roles");
     $rolesDisponibles = $stmtRoles->fetchAll();
 } catch (PDOException $e) {
@@ -31,11 +27,11 @@ try {
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background-color: #0f172a; color: white; /* Sugerencia oscura para resaltar el glow ámbar */ }
+        body { background-color: #0f172a; color: white; }
         
         .glow-sync-card {
             position: relative;
-            background: #1e293b; /* Fondo de la tarjeta */
+            background: #1e293b;
             border: 1px solid #334155;
             border-radius: 0.75rem;
             overflow: hidden;
@@ -84,7 +80,7 @@ try {
             <?php 
             $delay = 100;
             foreach ($usuarios as $user): 
-                $animClass = 'delay-' . ($delay > 300 ? 300 : $delay); // Capamos el delay visual
+                $animClass = 'delay-' . ($delay > 300 ? 300 : $delay);
             ?>
             
             <div class="glow-sync-card p-6 animate-fade-in-up <?= $animClass ?>">
@@ -127,7 +123,6 @@ try {
     </div>
 
     <script>
-        // Efecto del mouse para el glow
         document.querySelectorAll('.glow-sync-card').forEach(card => {
             card.addEventListener('mousemove', e => {
                 const rect = card.getBoundingClientRect();
@@ -136,9 +131,8 @@ try {
             });
         });
 
-        // Función para enviar el cambio a la API
         async function actualizarRol(event, usuarioId) {
-            event.preventDefault(); // Evita que la página se recargue
+            event.preventDefault(); 
             
             const selectElement = document.getElementById(`rol_${usuarioId}`);
             const nuevoRolId = selectElement.value;
@@ -167,7 +161,6 @@ try {
                     msgElement.classList.add('text-red-400', 'block');
                 }
                 
-                // Ocultar mensaje después de 3 segundos
                 setTimeout(() => msgElement.classList.add('hidden'), 3000);
 
             } catch (error) {

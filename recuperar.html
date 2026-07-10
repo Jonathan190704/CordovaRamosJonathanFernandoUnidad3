@@ -401,7 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
         Toast.show('success', '¡Transacción Exitosa!', data.msg);
         setTimeout(() => { window.location.href = 'index.html'; }, 3500);
       } else {
-        Toast.show('error', 'Error de Validación', data.msg); // Aquí mostrará "Código incorrecto"
+        Toast.show('error', 'Error de Validación', data.msg);
       }
     } catch {
       Toast.show('error', 'Fallo de Red', 'Error al procesar los cambios cifrados.');

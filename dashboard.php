@@ -1,6 +1,5 @@
 <?php
 require_once 'config/auth.php';
-// verificarAcceso();  <--- COMENTA ESTA LÍNEA TEMPORALMENTE
 require_once 'config/database.php';
 
 if (!isset($_SESSION['user_id'])) {

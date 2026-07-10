@@ -14,8 +14,6 @@ require_once __DIR__ . '/../libs/SMTP.php';
 
 $recaptchaSecret = RECAPTCHA_SECRET;
 
-// AQUI ESTABA EL ERROR: Se eliminó el bloque suelto de $mail->isSMTP() que estaba causando el 'null'
-
 $input = json_decode(file_get_contents('php://input'), true);
 $action = $input['action'] ?? '';
 
@@ -83,7 +81,6 @@ if ($action === 'request') {
     ]);
 
 
-    // AQUI ES DONDE REALMENTE SE DEBE CONFIGURAR EL CORREO, ya que creaste la variable $mail
     $mail = new PHPMailer(true);
 
     try {
